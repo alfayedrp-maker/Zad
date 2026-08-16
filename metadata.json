@@ -1,0 +1,6 @@
+{
+  "name": "Noor Al-Iman",
+  "description": "Comprehensive Islamic companion with accurate prayer times, Athan, Qibla compass, Holy Quran with recitation, Azkar and Tasbeeh.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
