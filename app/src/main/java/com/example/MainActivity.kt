@@ -36,6 +36,7 @@ import com.example.ui.screens.quran.QuranAudioBar
 import com.example.ui.screens.quran.QuranScreen
 import com.example.ui.screens.quran.SurahReaderScreen
 import com.example.ui.screens.settings.SettingsScreen
+import com.example.ui.theme.AppDynamicBackground
 import com.example.ui.theme.NoorAlImanTheme
 import com.example.ui.viewmodel.MainViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -72,6 +73,7 @@ fun NoorAlImanApp(viewModel: MainViewModel) {
     val currentLanguage by viewModel.currentLanguage.collectAsState()
     val isDarkThemePreference by viewModel.isDarkTheme.collectAsState()
     val themePalette by viewModel.themePalette.collectAsState()
+    val backgroundStyle by viewModel.backgroundStyle.collectAsState()
 
     val darkTheme = isDarkThemePreference ?: isSystemInDarkTheme()
     val strings = remember(currentLanguage) { getAppStrings(currentLanguage) }
@@ -109,9 +111,10 @@ fun NoorAlImanApp(viewModel: MainViewModel) {
         LocalLayoutDirection provides layoutDirection
     ) {
         NoorAlImanTheme(palette = themePalette, darkTheme = darkTheme) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
+            AppDynamicBackground(
+                backgroundStyle = backgroundStyle,
+                palette = themePalette,
+                isDark = darkTheme
             ) {
                 if (viewingSurah != null) {
                     SurahReaderScreen(
@@ -121,6 +124,7 @@ fun NoorAlImanApp(viewModel: MainViewModel) {
                     )
                 } else {
                     Scaffold(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
                         bottomBar = {
                             Column {
                                 // Floating Quran Audio Mini-Player

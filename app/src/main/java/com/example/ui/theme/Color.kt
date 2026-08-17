@@ -114,3 +114,69 @@ enum class AppThemePalette(
         previewGradient = listOf(Color(0xFF2C3E50), Color(0xFF34495E), Color(0xFFD4AF37))
     )
 }
+
+/**
+ * Islamic App Background Appearance Styles
+ */
+enum class AppBackgroundStyle(
+    val id: String,
+    val nameAr: String,
+    val nameEn: String,
+    val descriptionAr: String,
+    val drawableResId: Int?,
+    val hasAmbientGlow: Boolean,
+    val overlayAlphaLight: Float,
+    val overlayAlphaDark: Float
+) {
+    ARABESQUE_3D(
+        id = "arabesque_3d",
+        nameAr = "الزخرفة الإسلامية 3D",
+        nameEn = "3D Islamic Arabesque",
+        descriptionAr = "نقوش هندسية إسلامية ثلاثية الأبعاد بلمسات ذهبية",
+        drawableResId = com.example.R.drawable.islamic_3d_pattern_bg_1786962174471,
+        hasAmbientGlow = true,
+        overlayAlphaLight = 0.85f,
+        overlayAlphaDark = 0.78f
+    ),
+    KAABA_3D(
+        id = "kaaba_3d",
+        nameAr = "رحاب الكعبة المشرفة 3D",
+        nameEn = "3D Kaaba Sanctuary",
+        descriptionAr = "أجواء مهيبة مجسمة للكعبة المشرفة وأنوار الحرم",
+        drawableResId = com.example.R.drawable.islamic_3d_kaaba_scene_1786962150020,
+        hasAmbientGlow = true,
+        overlayAlphaLight = 0.88f,
+        overlayAlphaDark = 0.80f
+    ),
+    MOSQUE_3D(
+        id = "mosque_3d",
+        nameAr = "ليالي المساجد والمآذن 3D",
+        nameEn = "3D Luminous Mosque",
+        descriptionAr = "مآذن مضيئة وقباب ذهبية تحت سماء مرصعة بالنجوم",
+        drawableResId = com.example.R.drawable.islamic_3d_quran_dome_1786962161749,
+        hasAmbientGlow = true,
+        overlayAlphaLight = 0.88f,
+        overlayAlphaDark = 0.80f
+    ),
+    SPIRITUAL_AURA(
+        id = "spiritual_aura",
+        nameAr = "الهالة الروحانية المتدرجة",
+        nameEn = "Spiritual Aura Glow",
+        descriptionAr = "تدرج ضوئي مريح متناسق مع لون السمة المختارة",
+        drawableResId = null,
+        hasAmbientGlow = true,
+        overlayAlphaLight = 0.95f,
+        overlayAlphaDark = 0.90f
+    ),
+    MINIMAL_CLASSIC(
+        id = "minimal_classic",
+        nameAr = "النمط الهادئ الصافي",
+        nameEn = "Classic Minimal",
+        descriptionAr = "خلفية ناعمة وواضحة تركز على المحتوى وسهولة القراءة",
+        drawableResId = null,
+        hasAmbientGlow = false,
+        overlayAlphaLight = 1f,
+        overlayAlphaDark = 1f
+    )
+}
+

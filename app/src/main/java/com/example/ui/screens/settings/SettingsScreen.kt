@@ -1,5 +1,6 @@
 package com.example.ui.screens.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,6 +31,7 @@ import com.example.service.MUEZZIN_LIST
 import com.example.service.Muezzin
 import com.example.ui.localization.AppLanguage
 import com.example.ui.localization.LocalAppStrings
+import com.example.ui.theme.AppBackgroundStyle
 import com.example.ui.theme.AppThemePalette
 import com.example.ui.theme.GoldAccent
 import com.example.ui.viewmodel.MainViewModel
@@ -43,6 +47,7 @@ fun SettingsScreen(
     val selectedMuezzin by viewModel.selectedMuezzin.collectAsState()
     val isDarkTheme by viewModel.isDarkTheme.collectAsState()
     val themePalette by viewModel.themePalette.collectAsState()
+    val backgroundStyle by viewModel.backgroundStyle.collectAsState()
     val customAppName by viewModel.customAppName.collectAsState()
     val isPlayingAthan by viewModel.athanNotificationHelper.isPlayingAthan.collectAsState()
 
@@ -50,6 +55,7 @@ fun SettingsScreen(
     var showMethodDialog by remember { mutableStateOf(false) }
     var showMuezzinDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showBackgroundDialog by remember { mutableStateOf(false) }
     var showAppNameDialog by remember { mutableStateOf(false) }
     var showPublishGuideDialog by remember { mutableStateOf(false) }
 
@@ -130,7 +136,77 @@ fun SettingsScreen(
             }
         }
 
-        // 2. Custom App Name
+        // 2. Background Style & 3D Appearance
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showBackgroundDialog = true }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Wallpaper,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(26.dp)
+                        )
+                        Column {
+                            Text(
+                                text = strings.backgroundStyleTitle,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Text(
+                                text = if (isArabic) backgroundStyle.nameAr else backgroundStyle.nameEn,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.size(width = 36.dp, height = 24.dp)
+                        ) {
+                            val resId = backgroundStyle.drawableResId
+                            if (resId != null) {
+                                Image(
+                                    painter = painterResource(id = resId),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.primary)
+                                )
+                            }
+                        }
+                        Icon(Icons.Default.ChevronRight, contentDescription = null)
+                    }
+                }
+            }
+        }
+
+        // 3. Custom App Name
         item {
             SettingsCardItem(
                 title = strings.customizeAppName,
@@ -410,6 +486,113 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) {
+                    Text(strings.cancel)
+                }
+            }
+        )
+    }
+
+    // Background Style & 3D Islamic Appearance Dialog
+    if (showBackgroundDialog) {
+        AlertDialog(
+            onDismissRequest = { showBackgroundDialog = false },
+            title = {
+                Text(
+                    text = strings.selectBackgroundStyle,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            },
+            text = {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(AppBackgroundStyle.entries) { style ->
+                        val isSelected = style == backgroundStyle
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                            border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setBackgroundStyle(style)
+                                    showBackgroundDialog = false
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    // Thumbnail preview
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                        modifier = Modifier.size(width = 50.dp, height = 50.dp)
+                                    ) {
+                                        val styleResId = style.drawableResId
+                                        if (styleResId != null) {
+                                            Image(
+                                                painter = painterResource(id = styleResId),
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        } else if (style == AppBackgroundStyle.SPIRITUAL_AURA) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(
+                                                        Brush.radialGradient(
+                                                            listOf(GoldAccent, MaterialTheme.colorScheme.primary)
+                                                        )
+                                                    )
+                                            )
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(MaterialTheme.colorScheme.surface)
+                                            )
+                                        }
+                                    }
+
+                                    Column {
+                                        Text(
+                                            text = if (isArabic) style.nameAr else style.nameEn,
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                            )
+                                        )
+                                        Text(
+                                            text = if (isArabic) style.descriptionAr else style.nameAr,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 2
+                                        )
+                                    }
+                                }
+
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showBackgroundDialog = false }) {
                     Text(strings.cancel)
                 }
             }

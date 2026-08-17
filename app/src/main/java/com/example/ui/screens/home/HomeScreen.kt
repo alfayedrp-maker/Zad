@@ -54,6 +54,9 @@ fun HomeScreen(
     val alertModes by viewModel.prayerAlertModes.collectAsState()
     val isLocating by viewModel.isLocating.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
+    val backgroundStyle by viewModel.backgroundStyle.collectAsState()
+    val themePalette by viewModel.themePalette.collectAsState()
+    val selected3dSceneIndex by viewModel.selected3dSceneIndex.collectAsState()
 
     var showCityDialog by remember { mutableStateOf(false) }
 
@@ -67,6 +70,27 @@ fun HomeScreen(
         // Islamic App Header with Emblem Logo
         item {
             IslamicAppHeader(appName = customAppName)
+        }
+
+        // 3D Islamic Showcase Card with high-res 3D Islamic Scenes
+        item {
+            Islamic3dShowcaseCard(
+                selectedSceneIndex = selected3dSceneIndex,
+                onSelectScene = { viewModel.setSelected3dSceneIndex(it) },
+                onNavigateToQuran = { onNavigateToQuranSurah(1) },
+                onNavigateToQibla = onNavigateToQibla,
+                onNavigateToTasbeeh = onNavigateToTasbeeh
+            )
+        }
+
+        // Background & Theme Color Quick Switcher Bar
+        item {
+            BackgroundAndThemeQuickBar(
+                currentBackground = backgroundStyle,
+                currentPalette = themePalette,
+                onSelectBackground = { viewModel.setBackgroundStyle(it) },
+                onSelectPalette = { viewModel.setThemePalette(it) }
+            )
         }
 
         // Top Location and GPS bar
@@ -773,6 +797,423 @@ fun CitySelectionDialog(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Interactive 3D Islamic Interface Showcase Card
+ */
+@Composable
+fun Islamic3dShowcaseCard(
+    selectedSceneIndex: Int,
+    onSelectScene: (Int) -> Unit,
+    onNavigateToQuran: () -> Unit,
+    onNavigateToQibla: () -> Unit,
+    onNavigateToTasbeeh: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    data class SceneInfo(
+        val title: String,
+        val subtitle: String,
+        val verseText: String,
+        val actionText: String,
+        val actionIcon: ImageVector,
+        val imageRes: Int,
+        val onAction: () -> Unit
+    )
+
+    val scenes = listOf(
+        SceneInfo(
+            title = "الكعبة المشرفة 3D",
+            subtitle = "رحاب المسجد الحرام وقبلة المسلمين",
+            verseText = "« جَعَلَ اللَّهُ الْكَعْبَةَ الْبَيْتَ الْحَرَامَ قِيَامًا لِّلنَّاسِ »",
+            actionText = "بوصلة القبلة 3D",
+            actionIcon = Icons.Default.Explore,
+            imageRes = R.drawable.islamic_3d_kaaba_scene_1786962150020,
+            onAction = onNavigateToQibla
+        ),
+        SceneInfo(
+            title = "المصحف الشريف 3D",
+            subtitle = "نور الهداية والتلاوات العطرة",
+            verseText = "« إِنَّ هَـٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ »",
+            actionText = "تلاوة القرآن الكريم",
+            actionIcon = Icons.Default.MenuBook,
+            imageRes = R.drawable.islamic_3d_quran_dome_1786962161749,
+            onAction = onNavigateToQuran
+        ),
+        SceneInfo(
+            title = "المآذن والهلال 3D",
+            subtitle = "خشوع المساجد والذكر الحكيم",
+            verseText = "« فِي بُيُوتٍ أَذِنَ اللَّهُ أَن تُرْفَعَ وَيُذْكَرَ فِيهَا اسْمُهُ »",
+            actionText = "السبحة والأذكار",
+            actionIcon = Icons.Default.TouchApp,
+            imageRes = R.drawable.img_islamic_banner_1786916307487,
+            onAction = onNavigateToTasbeeh
+        )
+    )
+
+    val safeIndex = selectedSceneIndex.coerceIn(0, scenes.size - 1)
+    val activeScene = scenes[safeIndex]
+
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .border(1.dp, GoldAccent.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Header with 3D badge and interactive scene tabs
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(GoldAccent, Color(0xFFE59838))
+                                )
+                            )
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "3D إسلامي مجسم",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "المشاهد التفاعلية",
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                // Scene switcher tabs
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    scenes.indices.forEach { index ->
+                        val isSelected = index == safeIndex
+                        Box(
+                            modifier = Modifier
+                                .size(if (isSelected) 28.dp else 22.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isSelected) GoldAccent else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                )
+                                .clickable { onSelectScene(index) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${index + 1}",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = if (isSelected) 12.sp else 10.sp
+                                ),
+                                color = if (isSelected) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 3D Scene Hero Banner with rich depth overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = activeScene.imageRes),
+                    contentDescription = activeScene.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Depth gradient overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.4f),
+                                    Color.Black.copy(alpha = 0.85f)
+                                )
+                            )
+                        )
+                )
+
+                // Floating 3D scene title and quote
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Top tag
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color.Black.copy(alpha = 0.5f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GoldAccent.copy(alpha = 0.7f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = GoldAccent,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = activeScene.title,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+
+                    // Bottom verse and action
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = activeScene.verseText,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center
+                            ),
+                            color = GoldLight,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Text(
+                            text = activeScene.subtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.85f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
+            // Bottom quick action button
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { activeScene.onAction() }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = activeScene.actionIcon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = activeScene.actionText,
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Quick Switcher Bar for Background Styles & Color Themes
+ */
+@Composable
+fun BackgroundAndThemeQuickBar(
+    currentBackground: AppBackgroundStyle,
+    currentPalette: AppThemePalette,
+    onSelectBackground: (AppBackgroundStyle) -> Unit,
+    onSelectPalette: (AppThemePalette) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Background Styles Header & Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Wallpaper,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "شكل وخلفية التطبيق 3D",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(AppBackgroundStyle.entries) { style ->
+                    val isSelected = style == currentBackground
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+                        modifier = Modifier.clickable { onSelectBackground(style) }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            val styleRes = style.drawableResId
+                            if (styleRes != null) {
+                                Surface(
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(16.dp)
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = styleRes),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .background(
+                                            if (style == AppBackgroundStyle.SPIRITUAL_AURA) GoldAccent else MaterialTheme.colorScheme.primary,
+                                            CircleShape
+                                        )
+                                )
+                            }
+                            Text(
+                                text = style.nameAr,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                ),
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Theme Color Palettes Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ColorLens,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "ألوان السمة",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(AppThemePalette.entries) { palette ->
+                    val isSelected = palette == currentPalette
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+                        modifier = Modifier.clickable { onSelectPalette(palette) }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.linearGradient(palette.previewGradient)
+                                    )
+                            )
+                            Text(
+                                text = palette.nameAr,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                ),
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                 }

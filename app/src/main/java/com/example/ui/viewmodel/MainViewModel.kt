@@ -64,6 +64,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _themePalette = MutableStateFlow(com.example.ui.theme.AppThemePalette.EMERALD)
     val themePalette: StateFlow<com.example.ui.theme.AppThemePalette> = _themePalette.asStateFlow()
 
+    private val _backgroundStyle = MutableStateFlow(com.example.ui.theme.AppBackgroundStyle.ARABESQUE_3D)
+    val backgroundStyle: StateFlow<com.example.ui.theme.AppBackgroundStyle> = _backgroundStyle.asStateFlow()
+
+    private val _selected3dSceneIndex = MutableStateFlow(0)
+    val selected3dSceneIndex: StateFlow<Int> = _selected3dSceneIndex.asStateFlow()
+
     private val _customAppName = MutableStateFlow("نور الإيمان")
     val customAppName: StateFlow<String> = _customAppName.asStateFlow()
 
@@ -164,6 +170,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setThemePalette(palette: com.example.ui.theme.AppThemePalette) {
         _themePalette.value = palette
+    }
+
+    fun setBackgroundStyle(style: com.example.ui.theme.AppBackgroundStyle) {
+        _backgroundStyle.value = style
+    }
+
+    fun setSelected3dSceneIndex(index: Int) {
+        _selected3dSceneIndex.value = index
     }
 
     fun setCustomAppName(name: String) {
